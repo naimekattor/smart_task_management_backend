@@ -12,10 +12,8 @@ export class AttachmentService {
       throw new Error('Task not found');
     }
 
-    // 1. Upload to storage (S3 or local fallback)
     const storageResult = await uploadFile(file);
 
-    // 2. Save reference in DB
     const fileType = file.mimetype;
     const size = file.size;
     const name = file.originalname;
@@ -36,17 +34,11 @@ export class AttachmentService {
       throw new Error('Attachment not found');
     }
 
-    // 1. Extract key from URL
-    // URL format:
-    // S3: https://bucket.s3.region.amazonaws.com/key
-    // Local: /uploads/key
     const urlParts = attachment.url.split('/');
     const key = urlParts[urlParts.length - 1];
 
-    // 2. Delete file from storage
     await deleteFile(key);
 
-    // 3. Delete from DB
     await attachmentRepository.delete(id);
 
     return { success: true };

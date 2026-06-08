@@ -6,7 +6,7 @@ let io: Server | null = null;
 export function initSocket(server: HttpServer): Server {
   io = new Server(server, {
     cors: {
-      origin: '*', // Allow connections from frontend
+      origin: '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     },
   });
@@ -14,7 +14,6 @@ export function initSocket(server: HttpServer): Server {
   io.on('connection', (socket: Socket) => {
     console.log(`[Socket.IO]: Client connected: ${socket.id}`);
 
-    // Allow clients to join their user-specific notification channel
     socket.on('join_user', (userId: string) => {
       socket.join(userId);
       console.log(`[Socket.IO]: User ${userId} joined room`);

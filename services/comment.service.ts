@@ -47,7 +47,6 @@ export class CommentService {
       throw new Error('Comment not found');
     }
 
-    // Only owner of comment, PM, or Admin can delete comment
     if (comment.userId !== userId && userRole !== 'ADMIN' && userRole !== 'PROJECT_MANAGER') {
       throw new Error('Unauthorized to delete this comment');
     }

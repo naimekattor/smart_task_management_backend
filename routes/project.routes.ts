@@ -9,7 +9,7 @@ import { Role } from '@prisma/client';
 const router = Router();
 const controller = new ProjectController();
 
-router.use(authMiddleware); // All project routes require authentication
+router.use(authMiddleware);
 
 router.post(
   '/',

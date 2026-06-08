@@ -20,7 +20,6 @@ export function errorHandler(
     });
   }
 
-  // Handle custom validation rule messages (duplicate title, completed reassignment, etc.)
   const status = err.status || 400;
   return res.status(status).json({
     success: false,

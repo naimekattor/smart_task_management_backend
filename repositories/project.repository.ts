@@ -15,7 +15,6 @@ export class ProjectRepository {
     return prisma.$transaction(async (tx) => {
       const project = await tx.project.create({ data });
       
-      // Auto-assign creator as project member
       await tx.projectMember.create({
         data: {
           projectId: project.id,
@@ -91,8 +90,6 @@ export class ProjectRepository {
       ];
     }
 
-    // Role-based visibility: Team Members and PMs can only see projects they are assigned to.
-    // Admin has full visibility.
     if (userRole !== 'ADMIN' && userId) {
       where.members = {
         some: {

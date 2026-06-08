@@ -4,7 +4,6 @@ export class AnalyticsRepository {
   async getDashboardStats(userId?: string, role?: string) {
     const now = new Date();
 
-    // Visibility filter: Admins see all, others see only projects they are members of.
     const projectFilter: any = {};
     const taskFilter: any = {};
 
@@ -19,7 +18,6 @@ export class AnalyticsRepository {
       };
     }
 
-    // 1. Get KPI Counts
     const [
       totalProjects,
       totalTasks,
@@ -44,7 +42,6 @@ export class AnalyticsRepository {
 
     const pendingTasks = todoTasks + inProgressTasks;
 
-    // 2. Tasks by Priority Chart Data
     const [priorityHigh, priorityMedium, priorityLow] = await Promise.all([
       prisma.task.count({ where: { ...taskFilter, priority: 'HIGH' } }),
       prisma.task.count({ where: { ...taskFilter, priority: 'MEDIUM' } }),
@@ -57,14 +54,12 @@ export class AnalyticsRepository {
       { name: 'Low', value: priorityLow },
     ];
 
-    // 3. Task Status Distribution Chart Data
     const taskStatusDistribution = [
       { name: 'Todo', value: todoTasks },
       { name: 'In Progress', value: inProgressTasks },
       { name: 'Completed', value: completedTasks },
     ];
 
-    // 4. Project Progress Trend
     const projects = await prisma.project.findMany({
       where: projectFilter,
       select: {
@@ -88,7 +83,6 @@ export class AnalyticsRepository {
       };
     });
 
-    // 5. Team Productivity (Task completions per user)
     const users = await prisma.user.findMany({
       select: {
         name: true,
@@ -101,7 +95,7 @@ export class AnalyticsRepository {
     });
 
     const teamProductivity = users.map((u) => ({
-      name: u.name.split(' ')[0], // first name for chart label clarity
+      name: u.name.split(' ')[0],
       completed: u.assignedTasks.length,
     }));
 

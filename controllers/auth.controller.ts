@@ -8,12 +8,11 @@ export class AuthController {
     try {
       const result = await authService.register(req.body);
 
-      // Set refresh token in secure cookie
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       return res.status(201).json({
@@ -33,12 +32,11 @@ export class AuthController {
     try {
       const result = await authService.login(req.body);
 
-      // Set refresh token in secure cookie
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       return res.status(200).json({
@@ -63,7 +61,7 @@ export class AuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       return res.status(200).json({

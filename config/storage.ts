@@ -42,7 +42,6 @@ export async function uploadFile(
     const url = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
     return { url, key };
   } else {
-    // Local fallback
     const uploadDir = path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -51,7 +50,6 @@ export async function uploadFile(
     const filePath = path.join(uploadDir, key);
     fs.writeFileSync(filePath, file.buffer);
     
-    // Returns relative server path
     const url = `/uploads/${key}`;
     return { url, key };
   }
@@ -65,7 +63,6 @@ export async function deleteFile(key: string): Promise<void> {
     });
     await s3Client.send(command);
   } else {
-    // Local fallback delete
     const filePath = path.join(process.cwd(), 'uploads', key);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

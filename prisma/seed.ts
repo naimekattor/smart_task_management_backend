@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  // 1. Clear existing data
   await prisma.notification.deleteMany();
   await prisma.activityLog.deleteMany();
   await prisma.comment.deleteMany();
@@ -16,13 +15,11 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.user.deleteMany();
 
-  // 2. Hash passwords
   const salt = await bcrypt.genSalt(10);
   const passwordAdmin = await bcrypt.hash('Admin@123', salt);
   const passwordPM = await bcrypt.hash('Manager@123', salt);
   const passwordMember = await bcrypt.hash('Member@123', salt);
 
-  // 3. Create Users
   const admin = await prisma.user.create({
     data: {
       name: 'Sarah Admin (Demo)',
@@ -65,12 +62,11 @@ async function main() {
 
   console.log('Users created successfully.');
 
-  // 4. Create Projects
   const project1 = await prisma.project.create({
     data: {
       name: 'Enterprise Dashboard Redesign',
       description: 'Revamping the core customer-facing metrics platform using Next.js 16 and Tailwind CSS v4.',
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       status: ProjectStatus.ACTIVE,
     },
   });
@@ -79,7 +75,7 @@ async function main() {
     data: {
       name: 'Cloud Infrastructure Migration',
       description: 'Migrating backend services from legacy servers to AWS containerized microservices.',
-      deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+      deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
       status: ProjectStatus.ACTIVE,
     },
   });
@@ -88,14 +84,13 @@ async function main() {
     data: {
       name: 'Mobile App Beta Launch',
       description: 'Finalizing the React Native mobile client for iOS and Android deployment.',
-      deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago (overdue)
+      deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       status: ProjectStatus.ON_HOLD,
     },
   });
 
   console.log('Projects created.');
 
-  // 5. Assign Members to Projects
   await prisma.projectMember.createMany({
     data: [
       { projectId: project1.id, userId: admin.id },
@@ -113,13 +108,11 @@ async function main() {
 
   console.log('Project memberships assigned.');
 
-  // 6. Create Tasks
-  // Project 1 Tasks
   const t1 = await prisma.task.create({
     data: {
       title: 'Design UI/UX Mockups',
       description: 'Create high-fidelity screens for the analytics charts in Figma.',
-      dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       priority: TaskPriority.HIGH,
       status: TaskStatus.COMPLETED,
       projectId: project1.id,
@@ -131,7 +124,7 @@ async function main() {
     data: {
       title: 'Configure Next.js State Management',
       description: 'Set up Zustand stores and TanStack Query client for API sync.',
-      dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+      dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       priority: TaskPriority.HIGH,
       status: TaskStatus.IN_PROGRESS,
       projectId: project1.id,
@@ -143,7 +136,7 @@ async function main() {
     data: {
       title: 'Implement Dark Mode Toggle',
       description: 'Integrate next-themes and add transition styles across layouts.',
-      dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+      dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
       priority: TaskPriority.LOW,
       status: TaskStatus.TODO,
       projectId: project1.id,
@@ -163,12 +156,11 @@ async function main() {
     },
   });
 
-  // Project 2 Tasks
   await prisma.task.create({
     data: {
       title: 'Create Dockerfiles for Express APIs',
       description: 'Write optimized multi-stage build files and verify image size.',
-      dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Overdue
+      dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       priority: TaskPriority.HIGH,
       status: TaskStatus.IN_PROGRESS,
       projectId: project2.id,
@@ -188,12 +180,11 @@ async function main() {
     },
   });
 
-  // Project 3 Tasks
   await prisma.task.create({
     data: {
       title: 'Setup Apple Developer Accounts',
       description: 'Purchase Developer Program membership and configure certificates.',
-      dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // Overdue
+      dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
       priority: TaskPriority.HIGH,
       status: TaskStatus.TODO,
       projectId: project3.id,
@@ -203,7 +194,6 @@ async function main() {
 
   console.log('Tasks created.');
 
-  // 7. Seed Comments
   await prisma.comment.create({
     data: {
       content: 'Figma mockups are approved, proceeding to components development.',
@@ -225,13 +215,12 @@ async function main() {
       content: 'Yes, Zustand will handle the sidebar and UI filters. TanStack Query will fetch data.',
       taskId: t2.id,
       userId: member1.id,
-      parentId: parentComment.id, // Reply
+      parentId: parentComment.id,
     },
   });
 
   console.log('Comments seeded.');
 
-  // 8. Seed Activity Logs (latest 10)
   await prisma.activityLog.createMany({
     data: [
       { userId: admin.id, action: 'PROJECT_CREATED', metadata: { projectName: project1.name } },
@@ -249,7 +238,6 @@ async function main() {
 
   console.log('Activity logs created.');
 
-  // 9. Seed Notifications
   await prisma.notification.createMany({
     data: [
       { userId: member1.id, type: 'TASK_ASSIGNED', message: 'You have been assigned: Configure Next.js State Management' },

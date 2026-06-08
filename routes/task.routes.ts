@@ -11,12 +11,11 @@ import { Role } from '@prisma/client';
 const router = Router();
 const controller = new TaskController();
 
-// Config Multer for memory buffering
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB limit
+    fileSize: 10 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
@@ -35,9 +34,8 @@ const upload = multer({
   },
 });
 
-router.use(authMiddleware); // All task endpoints require auth
+router.use(authMiddleware);
 
-// Core Task CRUD
 router.post(
   '/',
   roleMiddleware([Role.ADMIN, Role.PROJECT_MANAGER]),
@@ -53,11 +51,9 @@ router.delete(
   controller.delete
 );
 
-// Task Attachments
 router.post('/:id/attachments', upload.single('file'), controller.uploadAttachment);
 router.delete('/attachments/:attachmentId', controller.deleteAttachment);
 
-// Task Comments
 router.post('/:id/comments', validateBody(createCommentSchema), controller.createComment);
 router.put('/comments/:commentId', validateBody(updateCommentSchema), controller.updateComment);
 router.delete('/comments/:commentId', controller.deleteComment);

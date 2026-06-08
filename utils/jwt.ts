@@ -12,7 +12,7 @@ export interface TokenPayload {
 }
 
 export function generateAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' }); // 1 day for dashboard convenience, standard is 15m but 1d is very common.
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 }
 
 export function generateRefreshToken(payload: { id: string }): string {

@@ -73,12 +73,9 @@ export class TaskController {
       const userId = req.user!.id;
       const role = req.user!.role;
 
-      // Access checks: Team members can only update tasks assigned to them, and cannot reassign.
-      // But we can check that!
       const currentTask = await taskService.getTaskById(id);
 
       if (role === 'TEAM_MEMBER') {
-        // Team member can only update status of assigned tasks. They cannot modify title/deadline.
         if (currentTask.assignedUserId !== userId) {
           return res.status(403).json({
             success: false,
@@ -87,7 +84,6 @@ export class TaskController {
           });
         }
         
-        // Block modification of title, description, dueDate, priority, assignee by team members (only block if values are changed)
         const { title, description, dueDate, priority, assignedUserId } = req.body;
         
         const isAttemptingToChangeRestricted =
@@ -136,7 +132,7 @@ export class TaskController {
 
   async uploadAttachment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params; // task id
+      const { id } = req.params;
       const userId = req.user!.id;
       const file = req.file;
 
@@ -177,7 +173,7 @@ export class TaskController {
 
   async createComment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params; // task id
+      const { id } = req.params;
       const userId = req.user!.id;
 
       const comment = await commentService.create(

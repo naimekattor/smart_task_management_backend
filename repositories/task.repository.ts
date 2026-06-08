@@ -94,7 +94,7 @@ export class TaskRepository {
 
   async findAll(filters: TaskFilters) {
     const page = filters.page || 1;
-    const limit = filters.limit || 50; // default large limit for Kanban
+    const limit = filters.limit || 50;
     const skip = (page - 1) * limit;
 
     const where: Prisma.TaskWhereInput = {};

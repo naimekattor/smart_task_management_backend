@@ -14,21 +14,18 @@ export class TaskService {
   async create(data: any, creatorUserId: string) {
     const { title, description, dueDate, priority, projectId, assignedUserId } = data;
 
-    // 1. Prevent past deadline selection
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // start of today
+    today.setHours(0, 0, 0, 0);
     const taskDueDate = new Date(dueDate);
     if (taskDueDate < today) {
       throw new Error('Please select a valid deadline.');
     }
 
-    // 2. Prevent duplicate task title in same project
     const existing = await taskRepository.findByTitleInProject(projectId, title);
     if (existing) {
       throw new Error('This task already exists in the project.');
     }
 
-    // 3. Ensure assigned user (if any) is a member of the project
     if (assignedUserId) {
       const isMember = await projectRepository.isMember(projectId, assignedUserId);
       if (!isMember) {
@@ -46,14 +43,12 @@ export class TaskService {
       assignedUserId: assignedUserId || null,
     });
 
-    // Log activity
     await activityLogRepository.create(creatorUserId, 'TASK_CREATED', {
       taskId: task.id,
       taskTitle: task.title,
       projectId,
     });
 
-    // Notify assignee if assigned
     if (assignedUserId) {
       const note = await notificationRepository.create(
         assignedUserId,
@@ -92,7 +87,6 @@ export class TaskService {
       throw new Error('Task not found');
     }
 
-    // 1. Prevent duplicate task title in same project if title is changing
     if (title && title.toLowerCase() !== task.title.toLowerCase()) {
       const existing = await taskRepository.findByTitleInProject(task.projectId, title);
       if (existing) {
@@ -100,7 +94,6 @@ export class TaskService {
       }
     }
 
-    // 2. Prevent past deadline selection if due date is changing
     if (dueDate) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -110,14 +103,11 @@ export class TaskService {
       }
     }
 
-    // 3. Prevent reassigning completed task
-    // If the task is already completed, and user is trying to change the assignee
     if (assignedUserId !== undefined && assignedUserId !== task.assignedUserId) {
       if (task.status === TaskStatus.COMPLETED) {
         throw new Error('Completed tasks cannot be reassigned.');
       }
 
-      // Check if new assignee is project member
       if (assignedUserId) {
         const isMember = await projectRepository.isMember(task.projectId, assignedUserId);
         if (!isMember) {
@@ -135,7 +125,6 @@ export class TaskService {
       assignedUserId: assignedUserId === null ? null : assignedUserId,
     });
 
-    // Log status change activity
     if (status && status !== task.status) {
       if (status === 'COMPLETED') {
         await activityLogRepository.create(userId, 'TASK_COMPLETED', {
@@ -143,7 +132,6 @@ export class TaskService {
           taskTitle: updatedTask.title,
         });
 
-        // Notify creator or PM if someone else completed it
         if (task.assignedUserId && userId !== task.assignedUserId) {
           const note = await notificationRepository.create(
             task.assignedUserId,
@@ -162,7 +150,6 @@ export class TaskService {
       }
     }
 
-    // Notify new assignee if changed
     if (assignedUserId !== undefined && assignedUserId !== task.assignedUserId && assignedUserId) {
       const note = await notificationRepository.create(
         assignedUserId,
@@ -190,7 +177,6 @@ export class TaskService {
 
     await taskRepository.delete(id);
 
-    // Log activity
     await activityLogRepository.create(userId, 'TASK_DELETED', {
       taskTitle: task.title,
       projectId: task.projectId,

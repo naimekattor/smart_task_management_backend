@@ -13,13 +13,11 @@ export class ProjectService {
   async create(data: any, creatorUserId: string) {
     const { name, description, deadline, status } = data;
 
-    // 1. Validate deadline (must be future)
     const deadlineDate = new Date(deadline);
     if (deadlineDate <= new Date()) {
       throw new Error('Please select a valid future deadline.');
     }
 
-    // 2. Validate name uniqueness
     const existing = await projectRepository.findByName(name);
     if (existing) {
       throw new Error('Project name already exists.');
@@ -35,7 +33,6 @@ export class ProjectService {
       creatorUserId
     );
 
-    // 3. Log activity
     await activityLogRepository.create(creatorUserId, 'PROJECT_CREATED', {
       projectId: project.id,
       projectName: project.name,
@@ -45,7 +42,6 @@ export class ProjectService {
   }
 
   async getProjectById(id: string, userId: string, userRole: string) {
-    // Access check: only members or admin can view details
     if (userRole !== 'ADMIN') {
       const isMember = await projectRepository.isMember(id, userId);
       if (!isMember) {
@@ -71,7 +67,6 @@ export class ProjectService {
       throw new Error('Project not found');
     }
 
-    // Validate deadline if updated
     if (deadline) {
       const deadlineDate = new Date(deadline);
       if (deadlineDate <= new Date() && status !== 'COMPLETED') {
@@ -79,7 +74,6 @@ export class ProjectService {
       }
     }
 
-    // Validate name uniqueness if changed
     if (name && name.toLowerCase() !== project.name.toLowerCase()) {
       const existing = await projectRepository.findByName(name);
       if (existing) {
@@ -94,7 +88,6 @@ export class ProjectService {
       status,
     });
 
-    // Log activity
     await activityLogRepository.create(userId, 'PROJECT_UPDATED', {
       projectId: project.id,
       projectName: updatedProject.name,
@@ -111,7 +104,6 @@ export class ProjectService {
 
     await projectRepository.delete(id);
 
-    // Log activity
     await activityLogRepository.create(userId, 'PROJECT_DELETED', {
       projectName: project.name,
     });
@@ -137,7 +129,6 @@ export class ProjectService {
 
     const member = await projectRepository.addMember(projectId, memberUserId);
 
-    // Log activity
     await activityLogRepository.create(actionByUserId, 'MEMBER_ADDED', {
       projectId,
       projectName: project.name,
@@ -145,7 +136,6 @@ export class ProjectService {
       memberUserId,
     });
 
-    // Notify user
     const note = await notificationRepository.create(
       memberUserId,
       'PROJECT_ASSIGNED',
@@ -174,7 +164,6 @@ export class ProjectService {
 
     await projectRepository.removeMember(projectId, memberUserId);
 
-    // Log activity
     await activityLogRepository.create(actionByUserId, 'MEMBER_REMOVED', {
       projectId,
       projectName: project.name,
@@ -182,7 +171,6 @@ export class ProjectService {
       memberUserId,
     });
 
-    // Notify user
     const note = await notificationRepository.create(
       memberUserId,
       'PROJECT_REMOVED',

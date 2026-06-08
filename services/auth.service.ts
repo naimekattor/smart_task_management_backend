@@ -26,7 +26,7 @@ export class AuthService {
       name,
       email,
       password: hashedPassword,
-      role: Role.TEAM_MEMBER, // default role
+      role: Role.TEAM_MEMBER,
     });
 
     const payload: TokenPayload = {
@@ -139,7 +139,6 @@ export class AuthService {
       throw new Error('User not found');
     }
 
-    // Since findById returns selection without password, we can cast it or fetch user directly
     const fullUser = await userRepository.findByEmail(user.email);
     if (!fullUser) {
       throw new Error('User not found');
