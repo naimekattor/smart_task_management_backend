@@ -87,9 +87,17 @@ export class TaskController {
           });
         }
         
-        // Block modification of title, description, dueDate, priority, assignee by team members
+        // Block modification of title, description, dueDate, priority, assignee by team members (only block if values are changed)
         const { title, description, dueDate, priority, assignedUserId } = req.body;
-        if (title || description || dueDate || priority || (assignedUserId !== undefined && assignedUserId !== currentTask.assignedUserId)) {
+        
+        const isAttemptingToChangeRestricted =
+          (title !== undefined && title !== currentTask.title) ||
+          (description !== undefined && description !== currentTask.description) ||
+          (dueDate !== undefined && new Date(dueDate).getTime() !== new Date(currentTask.dueDate).getTime()) ||
+          (priority !== undefined && priority !== currentTask.priority) ||
+          (assignedUserId !== undefined && assignedUserId !== currentTask.assignedUserId);
+
+        if (isAttemptingToChangeRestricted) {
           return res.status(403).json({
             success: false,
             message: 'Access denied. Team members can only update task status.',
