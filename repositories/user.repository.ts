@@ -80,4 +80,10 @@ export class UserRepository {
       };
     });
   }
+
+  async delete(id: string) {
+    return prisma.user.delete({
+      where: { id },
+    });
+  }
 }

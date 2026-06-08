@@ -29,4 +29,29 @@ export class UserController {
       next(error);
     }
   }
+
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      // Safety check: Prevent admin from deleting themselves
+      if (req.user!.id === id) {
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot delete your own account.',
+          errors: [],
+        });
+      }
+
+      await userRepository.delete(id);
+
+      return res.status(200).json({
+        success: true,
+        message: 'User deleted successfully from the workspace.',
+        data: {},
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
