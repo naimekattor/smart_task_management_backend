@@ -96,6 +96,8 @@ model Task {
   attachments    Attachment[]
 
   @@unique([projectId, title])
+  @@index([assignedUserId])
+  @@index([projectId])
 }
 
 model Comment {
@@ -112,6 +114,8 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
+
+  @@index([taskId])
 }
 
 model Attachment {
@@ -127,6 +131,8 @@ model Attachment {
   // Relations
   task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
 }
 
 model ActivityLog {
@@ -138,6 +144,8 @@ model ActivityLog {
 
   // Relations
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Notification {
@@ -150,4 +158,6 @@ model Notification {
 
   // Relations
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
 }
